@@ -1,5 +1,7 @@
 import Web3 from "web3";
 import { ApiPromise, WsProvider } from "@polkadot/api";
+//import { OverrideBundleType} from '@polkadot/types'
+import { typesBundle, typesChain, typesSpec } from '@polkadot/apps-config/api';
 
 import { spawn, ChildProcess } from "child_process";
 import {
@@ -99,8 +101,10 @@ export async function startMoonbeamNode(
   const wsProvider = new WsProvider(`ws://localhost:${WS_PORT}`);
   const polkadotApi = await ApiPromise.create({
     provider: wsProvider,
-    types: polkadotJsTypes,
-    rpc: polkadotJsRpc,
+    // types: polkadotJsTypes,
+    // rpc: polkadotJsRpc,
+    //@ts-ignore
+    typesBundle, typesChain, typesSpec 
   });
 
   if (provider == "ws") {
