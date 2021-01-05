@@ -33,6 +33,7 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
+mod block_author;
 #[cfg(not(feature = "standalone"))]
 mod parachain;
 #[cfg(feature = "standalone")]

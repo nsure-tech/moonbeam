@@ -4,27 +4,21 @@ use frame_support::{
 	decl_error, decl_module, decl_storage, ensure, traits::FindAuthor, weights::Weight,
 };
 use frame_system::{ensure_none, Config as System};
-use parity_scale_codec::{Decode, Encode};
+use codec::{Decode, Encode};
+use stake::EventHandler;
+use account::*;
 use sp_core::ecdsa;
 #[cfg(feature = "std")]
 use sp_inherents::ProvideInherentData;
 use sp_inherents::{InherentData, InherentIdentifier, IsFatalError, ProvideInherent};
-use sp_runtime::RuntimeString;
+use sp_runtime::{RuntimeString, traits::IdentifyAccount};
 use sp_std::vec::Vec;
-
-#[impl_trait_for_tuples::impl_for_tuples(30)]
-pub trait EventHandler<Author> {
-	/// Note that the given account ID is the author of the current block.
-	fn note_author(author: Author);
-}
 
 pub trait Config: System {
 	/// Find the author of a block.
 	type FindAuthor: FindAuthor<Self::AccountId>;
 	/// An event handler for authored blocks.
 	type EventHandler: EventHandler<Self::AccountId>;
-	/// A workaround for converting ecdsa::Public to AccountId
-	type Account: From<ecdsa::Public> + Into<Self::AccountId>;
 }
 
 decl_error! {
@@ -49,9 +43,10 @@ decl_module! {
 		#[weight = 1_000_000]
 		fn set_author(origin, raw_author: ecdsa::Public) {
 			ensure_none(origin)?;
-			ensure!(<Author<T>>::get().is_none(), Error::<T>::AuthorAlreadySet);
-			let author: T::Account = raw_author.into();
-			<Self as Store>::Author::put(author.into());
+            ensure!(<Author<T>>::get().is_none(), Error::<T>::AuthorAlreadySet);
+            let signer_author: EthereumSigner = raw_author.into();
+            let author: T::AccountId = signer_author.into_account();
+			<Self as Store>::Author::put(author);
 		}
 
 		fn on_initialize() -> Weight {
@@ -91,7 +86,7 @@ impl InherentError {
 	#[cfg(feature = "std")]
 	pub fn try_from(id: &InherentIdentifier, data: &[u8]) -> Option<Self> {
 		if id == &INHERENT_IDENTIFIER {
-			<InherentError as parity_scale_codec::Decode>::decode(&mut &data[..]).ok()
+			<InherentError as codec::Decode>::decode(&mut &data[..]).ok()
 		} else {
 			None
 		}
