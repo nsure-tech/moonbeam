@@ -1,7 +1,5 @@
 # ![moonbeam](media/moonbeam-cover.jpg)
 
-![Tests](https://github.com/PureStake/moonbeam/workflows/Release/badge.svg)
-
 Run an Ethereum compatible ~~parachain~~ (and blockchain for now, until parachains are more stable)
 based on Substrate.
 
@@ -32,6 +30,14 @@ that specific version:
 
 ```bash
 ./scripts/init.sh
+```
+
+or
+
+```bash
+apt install llvm-dev clang libclang-dev librocksdb-dev
+cmake 3.19.1
+rustup target add wasm32-unknown-unknown
 ```
 
 ## Build Standalone
@@ -68,6 +74,11 @@ source $HOME/.cargo/env
 
 ```bash
 ./node/standalone/target/release/moonbase-standalone --dev
+```
+
+if you want to expose the port, do:
+```bash
+./node/standalone/target/release/moonbase-standalone --dev --rpc-external --ws-external --prometheus-external
 ```
 
 ## Docker image
